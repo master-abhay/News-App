@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:carousel_slider/carousel_slider.dart';
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -9,6 +9,22 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   TextEditingController searchController = TextEditingController();
+
+  //List of the NavBar Items
+  List<String> navBarItem = [
+    "Finance",
+    "Health",
+    "Top News",
+    "India",
+    "Finance",
+    "Health"
+    ,"Finance",
+    "Health",
+    "Top News",
+    "India",
+    "Finance",
+    "Health"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +46,7 @@ class _HomeState extends State<Home> {
                   child: TextField(
                     controller: searchController,
                     textInputAction: TextInputAction.search,
-                    onSubmitted: (value){
+                    onSubmitted: (value) {
                       print(value);
                     },
                     decoration: const InputDecoration(
@@ -71,7 +87,33 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-          )
+          ),
+
+          //navBAR
+          Container(
+              padding: EdgeInsets.all(5),
+
+              height: 50,
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: navBarItem.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: (){
+                        print(navBarItem[index]);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        margin: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                            color: const Color(	0xffff14900),
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Text(navBarItem[index],
+                        style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold, color: Colors.white),),
+                      ),
+                    );
+                  }))
         ],
       ),
     );
