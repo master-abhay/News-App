@@ -51,10 +51,9 @@ class _HomeState extends State<Home> {
     //This statement is just for the testing purpose so that we can check that correct data we getting or not. It can also be removed.
     log(data.toString());
 
-
-int i=0;
-    try{
-      for(Map element in data['articles']){
+    int i = 0;
+    try {
+      for (Map element in data['articles']) {
         i++;
         NewsQueryModel model = NewsQueryModel.fromMap(element);
         newsQueryModelList.add(model);
@@ -62,16 +61,14 @@ int i=0;
           isLoading = false;
         });
 
-        if(i == 5){
+        if (i == 5) {
           break;
         }
-
       }
-
-    }catch(e){
+    } catch (e) {
       print(e);
-    };
-
+    }
+    ;
   }
 
   bool isLoadingCarousel = true;
@@ -242,82 +239,88 @@ int i=0;
                           ),
                           items: newsQueryModelCarouselList.map((item) {
                             return Builder(builder: (BuildContext context) {
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              WebView(url: item.newsUrl)));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Card(
-                                    child: Stack(
-                                      children: [
-                                        Image.network(
-                                          item.newsImage,
-                                          height: double.infinity,
-                                          width: double.infinity,
-                                          fit: BoxFit.fill,
-                                        ),
-                                        Positioned(
-                                          top: 130,
-                                          left: 10,
-                                          child: Container(
-                                            height: MediaQuery.of(context)
-                                                .size
-                                                .height,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                    colors: [
-                                                  Colors.black12.withOpacity(0),
-                                                  Colors.black12.withOpacity(1)
-                                                ])),
-                                            child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    (item.newsHeading.length >
-                                                            35)
-                                                        ? item.newsHeading
-                                                                .substring(
-                                                                    0, 33) +
-                                                            "..."
-                                                        : item.newsHeading +
-                                                            "...",
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 14),
-                                                  ),
-                                                  Text(
-                                                    (item.newsDescription
-                                                                .length >
-                                                            35)
-                                                        ? item.newsDescription
-                                                                .substring(
-                                                                    0, 33) +
-                                                            "..."
-                                                        : item.newsDescription +
-                                                            "...",
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 10),
-                                                  )
-                                                ]),
+                              try {
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                WebView(url: item.newsUrl)));
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(25),
+                                    child: Card(
+                                      child: Stack(
+                                        children: [
+                                          Image.network(
+                                            item.newsImage,
+                                            height: double.infinity,
+                                            width: double.infinity,
+                                            fit: BoxFit.fill,
                                           ),
-                                        )
-                                      ],
+                                          Positioned(
+                                            top: 130,
+                                            left: 10,
+                                            child: Container(
+                                              height: MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              decoration: BoxDecoration(
+                                                  gradient:
+                                                      LinearGradient(colors: [
+                                                Colors.black12.withOpacity(0),
+                                                Colors.black12.withOpacity(1)
+                                              ])),
+                                              child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      (item.newsHeading.length >
+                                                              35)
+                                                          ? item.newsHeading
+                                                                  .substring(
+                                                                      0, 33) +
+                                                              "..."
+                                                          : item.newsHeading +
+                                                              "...",
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 14),
+                                                    ),
+                                                    Text(
+                                                      (item.newsDescription
+                                                                  .length >
+                                                              35)
+                                                          ? item.newsDescription
+                                                                  .substring(
+                                                                      0, 33) +
+                                                              "..."
+                                                          : item.newsDescription +
+                                                              "...",
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10),
+                                                    )
+                                                  ]),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
+                                );
+                              } catch (e) {
+                                print(e);
+                                return Container();
+                              }
+                              ;
                             });
                           }).toList(),
                         ),
@@ -348,87 +351,94 @@ int i=0;
                     shrinkWrap: true,
                     itemCount: newsQueryModelList.length,
                     itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => WebView(
-                                      url: newsQueryModelList[index].newsUrl)));
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 2),
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              topRight: Radius.circular(20.0),
-                              bottomRight: Radius.circular(30.0),
-                              bottomLeft: Radius.circular(40.0),
+                      try {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => WebView(
+                                        url: newsQueryModelList[index]
+                                            .newsUrl)));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 2),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10.0),
+                                topRight: Radius.circular(20.0),
+                                bottomRight: Radius.circular(30.0),
+                                bottomLeft: Radius.circular(40.0),
+                              ),
+                              child: Card(
+                                  elevation: 15,
+                                  shadowColor: Colors.purpleAccent,
+                                  child: Stack(children: [
+                                    Image.network(
+                                      newsQueryModelList[index].newsImage,
+                                      fit: BoxFit.fill,
+                                      width: double.infinity,
+                                      height: 250,
+                                    ),
+                                    Positioned(
+                                        top: 170,
+                                        right: 0,
+                                        bottom: 0,
+                                        left: 0,
+                                        child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 14),
+                                            decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                    colors: [
+                                                  Colors.black12
+                                                      .withOpacity(0.30),
+                                                  Colors.black.withOpacity(0.80)
+                                                ],
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.center)),
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                      newsQueryModelList[index]
+                                                          .newsHeading
+                                                          .substring(
+                                                              0,
+                                                              newsQueryModelList[
+                                                                              index]
+                                                                          .newsHeading
+                                                                          .length <
+                                                                      60
+                                                                  ? newsQueryModelList[
+                                                                          index]
+                                                                      .newsHeading
+                                                                      .length
+                                                                  : 60),
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 19,
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(
+                                                      "${newsQueryModelList[index].newsDescription.substring(0, newsQueryModelList[index].newsDescription.length < 50 ? newsQueryModelList[index].newsDescription.length : 50)}.......",
+                                                      style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10)),
+                                                ])))
+                                  ])),
                             ),
-                            child: Card(
-                                elevation: 15,
-                                shadowColor: Colors.purpleAccent,
-                                child: Stack(children: [
-                                  Image.network(
-                                    newsQueryModelList[index].newsImage,
-                                    fit: BoxFit.fill,
-                                    width: double.infinity,
-                                    height: 250,
-                                  ),
-                                  Positioned(
-                                      top: 170,
-                                      right: 0,
-                                      bottom: 0,
-                                      left: 0,
-                                      child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 14),
-                                          decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                  colors: [
-                                                Colors.black12
-                                                    .withOpacity(0.30),
-                                                Colors.black.withOpacity(0.80)
-                                              ],
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.center)),
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    newsQueryModelList[index]
-                                                        .newsHeading
-                                                        .substring(
-                                                            0,
-                                                            newsQueryModelList[
-                                                                            index]
-                                                                        .newsHeading
-                                                                        .length <
-                                                                    60
-                                                                ? newsQueryModelList[
-                                                                        index]
-                                                                    .newsHeading
-                                                                    .length
-                                                                : 60),
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 19,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                Text(
-                                                    "${newsQueryModelList[index].newsDescription.substring(0, newsQueryModelList[index].newsDescription.length < 50 ? newsQueryModelList[index].newsDescription.length : 50)}.......",
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 10)),
-                                              ])))
-                                ])),
                           ),
-                        ),
-                      );
+                        );
+                      } catch (e) {
+                        print(e);
+                        return Container();
+                      }
+                      ;
                     },
                   ),
 
