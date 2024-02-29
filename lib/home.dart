@@ -1,6 +1,14 @@
+import 'dart:convert';
+import 'dart:core';
+import 'dart:developer';
+
+import 'package:app_news/category.dart';
+import 'package:app_news/model.dart';
+import 'package:app_news/showMore.dart';
+import 'package:app_news/webView.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,19 +22,90 @@ class _HomeState extends State<Home> {
 
   //List of the NavBar Items
   List<String> navBarItem = [
-    "Finance",
-    "Health",
-    "Top News",
-    "India",
-    "Finance",
-    "Health",
-    "Finance",
-    "Health",
-    "Top News",
-    "India",
-    "Finance",
+    "Technology",
+    "Science",
+    "Entertainment",
+    "Sports",
     "Health"
   ];
+
+  // Section for creating the models of the news:
+
+  // List for Storing the models of ListViewSlider not CarouselSlider:
+  List<NewsQueryModel> newsQueryModelList = <NewsQueryModel>[];
+
+  bool isLoading = true;
+
+  Future<void> getNewsByQuery(String query) async {
+    //Accessing Currrent Date for the news Updates:
+
+    DateTime now = DateTime.now();
+    String nowInString = now.toString();
+    nowInString = nowInString.substring(0, 11);
+
+    String url =
+        "https://newsapi.org/v2/everything?q=$query&sortBy=publishedAt&apiKey=61dac02ee57c4f6f94b3f7cd0c67e291";
+
+    Response response = await get(Uri.parse(url));
+    Map data = await jsonDecode(response.body);
+    //This statement is just for the testing purpose so that we can check that correct data we getting or not. It can also be removed.
+    log(data.toString());
+
+
+int i=0;
+    try{
+      for(Map element in data['articles']){
+        i++;
+        NewsQueryModel model = NewsQueryModel.fromMap(element);
+        newsQueryModelList.add(model);
+        setState(() {
+          isLoading = false;
+        });
+
+        if(i == 5){
+          break;
+        }
+
+      }
+
+    }catch(e){
+      print(e);
+    };
+
+  }
+
+  bool isLoadingCarousel = true;
+
+  //list for Storing the models of the Carousel Slider:
+  List<NewsQueryModel> newsQueryModelCarouselList = <NewsQueryModel>[];
+
+  Future<void> getCarouselSliderQuery() async {
+    String url =
+        await "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=61dac02ee57c4f6f94b3f7cd0c67e291";
+    // String url = await "https://newsapi.org/v2/top-headlines?country=in&category=health&apiKey=61dac02ee57c4f6f94b3f7cd0c6";
+    Response response = await get(Uri.parse(url));
+    Map data = await jsonDecode(response.body);
+    data['articles'].forEach((element) {
+      NewsQueryModel model = NewsQueryModel.fromMap(element);
+      newsQueryModelCarouselList.add(model);
+
+      //To check that
+      log(newsQueryModelCarouselList.toString());
+      setState(() {
+        isLoadingCarousel = false;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    newsQueryModelList.clear();
+    newsQueryModelCarouselList.clear();
+    getNewsByQuery("aaj tak");
+    getCarouselSliderQuery();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +115,7 @@ class _HomeState extends State<Home> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Column
-          (
+        child: Column(
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
@@ -52,11 +130,24 @@ class _HomeState extends State<Home> {
                       controller: searchController,
                       textInputAction: TextInputAction.search,
                       onSubmitted: (value) {
-                        print(value);
+                        if ((value).replaceAll(' ', '') != '') {
+                          // Clear the search input field
+                          // searchController.clear();
+
+                          // Navigate to the same screen with the new query
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ShowMore(
+                                showMore: value,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        hintText: "Let's cook something...",
+                        hintText: "Find News...",
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -67,21 +158,18 @@ class _HomeState extends State<Home> {
                   GestureDetector(
                     onTap: () {
                       if ((searchController.text).replaceAll(' ', '') != '') {
-                        // If the text is not blank, perform the search
-                        // getRecipe(searchController.text);
-
                         // Clear the search input field
                         // searchController.clear();
 
                         // Navigate to the same screen with the new query
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => Search(
-                        //       querry: searchController.text,
-                        //     ),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShowMore(
+                              showMore: searchController.text,
+                            ),
+                          ),
+                        );
                       }
                     },
                     child: const Icon(
@@ -105,7 +193,12 @@ class _HomeState extends State<Home> {
                     itemBuilder: (context, index) {
                       return InkWell(
                         onTap: () {
-                          print(navBarItem[index]);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Category(
+                                        categoryText: navBarItem[index],
+                                      )));
                         },
                         child: Container(
                           padding: const EdgeInsets.all(5),
@@ -115,7 +208,7 @@ class _HomeState extends State<Home> {
                               borderRadius: BorderRadius.circular(5)),
                           child: Text(
                             navBarItem[index],
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),
@@ -123,150 +216,231 @@ class _HomeState extends State<Home> {
                         ),
                       );
                     })),
+
 //Creating the CarouselSlider
-            CarouselSlider(
-              options: CarouselOptions(
-                height: 180.0,
-                aspectRatio: 16 / 9,
-                viewportFraction: 0.7,
-                initialPage: 0,
-                enableInfiniteScroll: true,
-                reverse: false,
-                autoPlay: true,
-                autoPlayInterval: Duration(seconds: 2),
-                autoPlayAnimationDuration: Duration(milliseconds: 800),
-                autoPlayCurve: Curves.fastOutSlowIn,
-                enlargeCenterPage: true,
-                enlargeFactor: 0.3,
-                scrollDirection: Axis.horizontal,
-              ),
-              items: items.map((item) {
-                return Builder(builder: (BuildContext context) {
-                  return InkWell(
-                    onTap: () {},
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: Card(
-                        child: Stack(
-                          children: [
-                            Image.asset(
-                              "images/card_image.jpg",
-                              height: double.infinity,
-                              width: double.infinity,
-                              fit: BoxFit.fill,
-                            ),
-                            Positioned(
-                              top: 130,
-                              left: 10,
-                              child: Container(
-                                height: MediaQuery.of(context).size.height,
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(colors: [
-                                  Colors.black12.withOpacity(0),
-                                  Colors.black12.withOpacity(1)
-                                ])),
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "NEWS Headline",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 14),
-                                      ),
-                                      Text(
-                                        "Description........",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10),
-                                      )
-                                    ]),
-                              ),
-                            )
-                          ],
+            Container(
+              child: Column(
+                children: [
+                  isLoadingCarousel
+                      ? const CircularProgressIndicator()
+                      : CarouselSlider(
+                          options: CarouselOptions(
+                            height: 180.0,
+                            aspectRatio: 16 / 9,
+                            viewportFraction: 0.7,
+                            initialPage: 0,
+                            enableInfiniteScroll: true,
+                            reverse: false,
+                            autoPlay: true,
+                            autoPlayInterval: const Duration(seconds: 2),
+                            autoPlayAnimationDuration:
+                                const Duration(milliseconds: 800),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                            enlargeCenterPage: true,
+                            enlargeFactor: 0.3,
+                            scrollDirection: Axis.horizontal,
+                          ),
+                          items: newsQueryModelCarouselList.map((item) {
+                            return Builder(builder: (BuildContext context) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              WebView(url: item.newsUrl)));
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Card(
+                                    child: Stack(
+                                      children: [
+                                        Image.network(
+                                          item.newsImage,
+                                          height: double.infinity,
+                                          width: double.infinity,
+                                          fit: BoxFit.fill,
+                                        ),
+                                        Positioned(
+                                          top: 130,
+                                          left: 10,
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                    colors: [
+                                                  Colors.black12.withOpacity(0),
+                                                  Colors.black12.withOpacity(1)
+                                                ])),
+                                            child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    (item.newsHeading.length >
+                                                            35)
+                                                        ? item.newsHeading
+                                                                .substring(
+                                                                    0, 33) +
+                                                            "..."
+                                                        : item.newsHeading +
+                                                            "...",
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14),
+                                                  ),
+                                                  Text(
+                                                    (item.newsDescription
+                                                                .length >
+                                                            35)
+                                                        ? item.newsDescription
+                                                                .substring(
+                                                                    0, 33) +
+                                                            "..."
+                                                        : item.newsDescription +
+                                                            "...",
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 10),
+                                                  )
+                                                ]),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            });
+                          }).toList(),
                         ),
-                      ),
-                    ),
-                  );
-                });
-              }).toList(),
+                ],
+              ),
             ),
 
             //Creating the Cards with scrollable listView
 
             //Adding Text
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
-
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Text("Latest News",style: textStyle,),],
+                  Text(
+                    "Latest News",
+                    style: textStyle,
+                  ),
+                ],
               ),
             ),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () {},
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10.0),
-                        topRight: Radius.circular(20.0),
-                        bottomRight: Radius.circular(30.0),
-                        bottomLeft: Radius.circular(40.0),
-                      ),
-                      child: Card(
-                          elevation: 15,
-                          shadowColor: Colors.purpleAccent,
-                          child: Stack(children: [
-                            Image.asset("images/card_image.jpg"),
-                            Positioned(
-                                top: 220,
-                                right: 0,
-                                bottom: 0,
-                                left: 20,
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(colors: [
-                                      Colors.black12.withOpacity(0),
-                                      Colors.black.withOpacity(1)
-                                    ])),
-                                    child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text("News Headline",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold)),
-                                          SizedBox(
-                                            width: 6,
-                                          ),
-                                          Text("News Description",
-                                              style: TextStyle(
-                                                  color: Colors.white))
-                                        ])))
-                          ])),
-                    ),
+
+            isLoading
+                ? const CircularProgressIndicator()
+                : ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: newsQueryModelList.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WebView(
+                                      url: newsQueryModelList[index].newsUrl)));
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10.0),
+                              topRight: Radius.circular(20.0),
+                              bottomRight: Radius.circular(30.0),
+                              bottomLeft: Radius.circular(40.0),
+                            ),
+                            child: Card(
+                                elevation: 15,
+                                shadowColor: Colors.purpleAccent,
+                                child: Stack(children: [
+                                  Image.network(
+                                    newsQueryModelList[index].newsImage,
+                                    fit: BoxFit.fill,
+                                    width: double.infinity,
+                                    height: 250,
+                                  ),
+                                  Positioned(
+                                      top: 170,
+                                      right: 0,
+                                      bottom: 0,
+                                      left: 0,
+                                      child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 14),
+                                          decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                  colors: [
+                                                Colors.black12
+                                                    .withOpacity(0.30),
+                                                Colors.black.withOpacity(0.80)
+                                              ],
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.center)),
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    newsQueryModelList[index]
+                                                        .newsHeading
+                                                        .substring(
+                                                            0,
+                                                            newsQueryModelList[
+                                                                            index]
+                                                                        .newsHeading
+                                                                        .length <
+                                                                    60
+                                                                ? newsQueryModelList[
+                                                                        index]
+                                                                    .newsHeading
+                                                                    .length
+                                                                : 60),
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 19,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(
+                                                    "${newsQueryModelList[index].newsDescription.substring(0, newsQueryModelList[index].newsDescription.length < 50 ? newsQueryModelList[index].newsDescription.length : 50)}.......",
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 10)),
+                                              ])))
+                                ])),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
 
             // Creting Show More Button
             ElevatedButton(
               style: raisedButtonStyle,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ShowMore(showMore: "Aaj Tak")));
+              },
               child: Text(
                 'show more',
                 style: textStyle,
