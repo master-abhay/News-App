@@ -413,19 +413,19 @@ class _HomeState extends State<Home> {
                                                                               index]
                                                                           .newsHeading
                                                                           .length <
-                                                                      60
+                                                                      50
                                                                   ? newsQueryModelList[
                                                                           index]
                                                                       .newsHeading
                                                                       .length
-                                                                  : 60),
+                                                                  : 50),
                                                       style: const TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 19,
                                                           fontWeight:
                                                               FontWeight.bold)),
                                                   Text(
-                                                      "${newsQueryModelList[index].newsDescription.substring(0, newsQueryModelList[index].newsDescription.length < 50 ? newsQueryModelList[index].newsDescription.length : 50)}.......",
+                                                      "${newsQueryModelList[index].newsDescription.substring(0, newsQueryModelList[index].newsDescription.length < 45 ? newsQueryModelList[index].newsDescription.length : 45)}.......",
                                                       style: const TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 10)),
